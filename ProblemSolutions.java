@@ -1,6 +1,6 @@
 /******************************************************************
  *
- *   ADD YOUR NAME / SECTION NUMBER HERE
+ *   Alisa Samakhval COMP 272 - 001
  *
  *   This java file contains the problem solutions of canFinish and
  *   numGroups methods.
@@ -26,7 +26,7 @@ class ProblemSolutions {
      * in prerequisites. You want to avoid this embarrassment by making sure you define
      * a curriculum and exam schedule that can be completed.
      *
-     * You goal is to ensure that any student pursuing the certificate of 'master
+     * Your goal is to ensure that any student pursuing the certificate of 'master
      * programmer', can complete 'n' certification exams, each being specific to a
      * topic. Some exams have prerequisites of needing to take and pass earlier
      * certificate exams. You do not want to force any order of taking the exams, but
@@ -72,18 +72,45 @@ class ProblemSolutions {
      * @return boolean          - True if all exams can be taken, else false.
      */
 
-    public boolean canFinish(int numExams, 
-                             int[][] prerequisites) {
-      
-        int numNodes = numExams;  // # of nodes in graph
+    public boolean canFinish(int numExams, int[][] prerequisites) {
+        int numNodes = numExams;
+        ArrayList<Integer>[] adj = new ArrayList[numNodes];
+        for (int i = 0; i < numNodes; i++) {
+            adj[i] = new ArrayList<>();
+        }
 
-        // Build directed graph's adjacency list
-        ArrayList<Integer>[] adj = getAdjList(numExams, 
-                                        prerequisites); 
+        for (int[] edge : prerequisites) {
+            adj[edge[0]].add(edge[1]);
+        }
+        int[] visited = new int[numNodes];
 
-        // ADD YOUR CODE HERE - ADD YOUR NAME / SECTION AT TOP OF FILE
+        for (int i = 0; i < numNodes; i++) {
+            if (visited[i] == 0) {
+                if (isCycle(i, adj, visited)) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+
+    private boolean isCycle(int node, ArrayList<Integer>[] adj, int[] visited) {
+        visited[node] = 1;
+
+        for (int neighbor : adj[node]) {
+            if (visited[neighbor] == 1) {
+                return true;
+            }
+            if (visited[neighbor] == 0 && isCycle(neighbor, adj, visited)) {
+                return true;
+            }
+        }
+
+
+        visited[node] = 2;
         return false;
-
     }
 
 
@@ -165,34 +192,55 @@ class ProblemSolutions {
 
     public int numGroups(int[][] adjMatrix) {
         int numNodes = adjMatrix.length;
-        Map<Integer,List<Integer>> graph = new HashMap();
-        int i = 0, j =0;
-
-        /*
-         * Converting the Graph Adjacency Matrix to
-         * an Adjacency List representation. This
-         * sample code illustrates a technique to do so.
-         */
-
-        for(i = 0; i < numNodes ; i++){
-            for(j = 0; j < numNodes; j++){
-                if( adjMatrix[i][j] == 1 && i != j ){
-                    // Add AdjList for node i if not there
-                    graph.putIfAbsent(i, new ArrayList());
-                    // Add AdjList for node j if not there
-                    graph.putIfAbsent(j, new ArrayList());
-
-                    // Update node i adjList to include node j
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        for (int i = 0; i < numNodes; i++) {
+            for (int j = 0; j < numNodes; j++) {
+                if (adjMatrix[i][j] == 1 && i != j) {
+                    graph.putIfAbsent(i, new ArrayList<>());
+                    graph.putIfAbsent(j, new ArrayList<>());
                     graph.get(i).add(j);
-                    // Update node j adjList to include node i
                     graph.get(j).add(i);
                 }
             }
         }
 
-        // YOUR CODE GOES HERE - you can add helper methods, you do not need
-        // to put all code in this method.
-        return -1;
+        for (int i = 0; i < numNodes; i++) {
+            graph.putIfAbsent(i, new ArrayList<>());
+        }
+
+        boolean[] visited = new boolean[numNodes];
+        int groupsCount = 0;
+
+
+        for (int i = 0; i < numNodes; i++) {
+            if (!visited[i]) {
+                dfs(i, graph, visited);
+                groupsCount++;
+            }
+        }
+
+
+
+
+        return groupsCount;
+    }
+
+
+    private void dfs(int node, Map<Integer, List<Integer>> graph, boolean[] visited) {
+        Stack<Integer> stack = new Stack<>();
+        stack.push(node);
+
+        while (!stack.isEmpty()) {
+            int current = stack.pop();
+            if (!visited[current]) {
+                visited[current] = true;
+                for (int neighbor : graph.get(current)) {
+                    if (!visited[neighbor]) {
+                        stack.push(neighbor);
+                    }
+                }
+            }
+        }
     }
 
 }
